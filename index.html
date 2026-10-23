@@ -1,0 +1,233 @@
+<head>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#101827">
+<title>VidoSave - Video Link Tool</title>
+<style>
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background: #101827;
+  color: #f8fafc;
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+}
+
+.app {
+  width: 100%;
+  max-width: 440px;
+  padding: 28px 20px;
+}
+
+.logo {
+  font-size: 27px;
+  font-weight: 800;
+  letter-spacing: -1px;
+}
+
+.logo span { color: #55e6a5; }
+
+.tag {
+  color: #9caec4;
+  font-size: 14px;
+  margin-top: 8px;
+}
+
+.card {
+  margin-top: 35px;
+  background: #1c293b;
+  border: 1px solid #304057;
+  border-radius: 20px;
+  padding: 22px;
+}
+
+h1 { font-size: 25px; line-height: 1.3; }
+
+p {
+  color: #b6c3d4;
+  line-height: 1.6;
+  font-size: 14px;
+}
+
+label {
+  display: block;
+  margin: 22px 0 9px;
+  font-size: 14px;
+  font-weight: bold;
+}
+
+input {
+  width: 100%;
+  padding: 15px;
+  border-radius: 11px;
+  border: 1px solid #52647b;
+  background: #101827;
+  color: white;
+  font-size: 15px;
+  outline: none;
+}
+
+button {
+  width: 100%;
+  margin-top: 13px;
+  padding: 15px;
+  border: 0;
+  border-radius: 11px;
+  background: #55e6a5;
+  color: #102018;
+  font-size: 15px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.secondary {
+  background: #2d3b50;
+  color: white;
+}
+
+#result {
+  display: none;
+  margin-top: 18px;
+  padding: 14px;
+  background: #101827;
+  border-radius: 12px;
+  overflow-wrap: anywhere;
+}
+
+#result a {
+  color: #55e6a5;
+  display: inline-block;
+  margin-top: 12px;
+}
+
+.note {
+  margin-top: 20px;
+  padding: 13px;
+  border-radius: 10px;
+  background: #263346;
+  font-size: 12px;
+  line-height: 1.6;
+  color: #c7d3e2;
+}
+
+footer {
+  margin-top: 25px;
+  text-align: center;
+  font-size: 12px;
+  color: #91a0b5;
+}
+</style>
+</head>
+<body>
+<main class="app">
+  <div class="logo">Vido<span>Save</span></div>
+  <div class="tag">Your video link assistant</div>
+
+  <section class="card">
+    <h1>Save the videos you love.</h1>
+    <p>Start by pasting a public Facebook video link below.</p>
+
+    <form id="videoForm">
+      <label for="videoUrl">Facebook video URL</label>
+      <input
+        id="videoUrl"
+        type="url"
+        placeholder="https://www.facebook.com/..."
+        required
+      >
+
+      <button type="submit">Check video link</button>
+      <button class="secondary" type="button" id="pasteBtn">
+        Paste from clipboard
+      </button>
+    </form>
+
+    <div id="result" role="status" aria-live="polite"></div>
+
+    <div class="note">
+      Prototype version 0.1. This tool checks the link format
+      only. It does not fetch or download videos. Only use
+      content you own or have permission to save.
+    </div>
+  </section>
+
+  <footer>
+    Independent prototype · Not affiliated with Meta
+  </footer>
+</main>
+
+<script>
+const form = document.getElementById("videoForm");
+const input = document.getElementById("videoUrl");
+const result = document.getElementById("result");
+
+function showResult(message, link) {
+  result.replaceChildren();
+  result.style.display = "block";
+
+  const text = document.createElement("p");
+  text.textContent = message;
+  result.appendChild(text);
+
+  if (link) {
+    const anchor = document.createElement("a");
+    anchor.href = link;
+    anchor.target = "_blank";
+    anchor.rel = "noopener noreferrer";
+    anchor.textContent = "Open Facebook video";
+    result.appendChild(anchor);
+  }
+}
+
+form.addEventListener("submit", function(event) {
+  event.preventDefault();
+
+  let url;
+
+  try {
+    url = new URL(input.value.trim());
+  } catch {
+    showResult("Please enter a valid web address.");
+    return;
+  }
+
+  const host = url.hostname.toLowerCase();
+  const allowed = [
+    "facebook.com",
+    "www.facebook.com",
+    "m.facebook.com",
+    "web.facebook.com",
+    "fb.watch"
+  ];
+
+  if (url.protocol !== "https:" ||
+      !allowed.includes(host)) {
+    showResult("Please enter an HTTPS link from a supported Facebook domain.");
+    return;
+  }
+
+  showResult(
+    "The link format looks valid. Actual video retrieval is not implemented yet.",
+    url.href
+  );
+});
+
+document.getElementById("pasteBtn").addEventListener(
+  "click", async function() {
+    try {
+      input.value = await navigator.clipboard.readText();
+      showResult("Link pasted. Tap Check video link to validate it.");
+    } catch {
+      showResult("Clipboard access is unavailable. Press and hold the input field and choose Paste.");
+    }
+  }
+);
+</script>
+</body>
+</html>

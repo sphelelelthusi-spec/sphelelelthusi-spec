@@ -131,7 +131,10 @@ form.addEventListener("submit", function(event) {
     return;
   }
 
-  showMessage(result, "The link format looks valid. Facebook video retrieval is not implemented.");
+  showMessage(
+  result,
+  "Your link format looks valid, but VidoSave has not downloaded the video. Open the original video on Facebook to view it."
+);
   const a = document.createElement("a");
   a.href = url.href;
   a.target = "_blank";

@@ -2,226 +2,383 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="theme-color" content="#0b1020">
-<title>VidoSave | Video Link Assistant</title>
-<style>
-* { box-sizing: border-box; }
-:root {
-  --bg: #0b1020;
-  --panel: #141d30;
-  --green: #53f0ad;
-  --muted: #a7b4c8;
-}
-body {
-  margin: 0;
-  min-height: 100vh;
-  background: radial-gradient(ellipse at top, #173a3a, var(--bg) 60%);
-  color: #f8fafc;
-  font-family: Arial, sans-serif;
-}
-.app { max-width: 480px; margin: auto; padding: 26px 18px 36px; }
-.top { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
-.logo { font-size: 27px; font-weight: 800; letter-spacing: -1px; }
-.logo span, h1 span { color: var(--green); }
-.status { font-size: 11px; color: var(--green); border: 1px solid #326953; border-radius: 30px; padding: 7px 10px; }
-.hero { text-align: center; padding: 35px 0 22px; }
-.symbol { width: 64px; height: 64px; display: grid; place-items: center; margin: 0 auto 17px; border-radius: 20px; background: #173b35; border: 1px solid #28624f; color: var(--green); font-size: 28px; }
-h1 { font-size: 31px; line-height: 1.2; margin: 0; }
-p { color: var(--muted); font-size: 14px; line-height: 1.6; }
-.hero p { max-width: 330px; margin: 12px auto 0; }
-.card { background: var(--panel); border: 1px solid #2a3850; border-radius: 20px; padding: 20px; margin-top: 15px; }
-h2 { font-size: 18px; margin: 0; }
-label { display: block; margin: 18px 0 9px; font-size: 13px; font-weight: bold; }
-input[type="url"] { width: 100%; padding: 14px 12px; border: 1px solid #3b4b63; border-radius: 11px; background: var(--bg); color: white; font-size: 14px; }
-button, .file-label { display: block; width: 100%; text-align: center; border: 0; border-radius: 11px; padding: 14px; margin-top: 12px; font-size: 14px; font-weight: bold; cursor: pointer; }
-.primary, .file-label { background: var(--green); color: #092019; }
-.secondary { background: #26344b; color: white; border: 1px solid #3b4b63; }
-#result, #fileResult { display: none; overflow-wrap: anywhere; margin-top: 15px; padding: 13px; border: 1px solid #3b4b63; border-radius: 12px; background: var(--bg); }
-#result p, #fileResult p { margin: 0; }
-#result a, #fileResult a { display: inline-block; margin-top: 10px; color: var(--green); }
-#videoFile { display: block; width: 100%; margin-top: 15px; color: var(--muted); font-size: 13px; }
-#preview { display: none; width: 100%; max-height: 300px; margin-top: 15px; border-radius: 12px; background: black; }
-.note { margin-top: 14px; padding: 12px; background: #1d2c40; border-radius: 11px; }
-.note strong { color: var(--green); font-size: 12px; }
-.note p { font-size: 12px; margin: 6px 0 0; }
-footer { text-align: center; margin-top: 25px; color: #7f8da3; font-size: 11px; line-height: 1.7; }
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#0b1020">
+  <meta name="description" content="VidoSave helps you check video links and manage video files on your device.">
+  <link rel="manifest" href="./manifest.json">
+  <title>VidoSave | Your Videos, Your Way</title>
+
+  <style>
+    * { box-sizing: border-box; }
+
+    :root {
+      --bg: #0b1020;
+      --panel: #141d30;
+      --green: #53f0ad;
+      --muted: #a7b4c8;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: radial-gradient(ellipse at top, #173a3a, var(--bg) 60%);
+      color: #f8fafc;
+      font-family: Arial, sans-serif;
+    }
+
+    .app {
+      max-width: 480px;
+      margin: auto;
+      padding: 24px 18px 36px;
+    }
+
+    .top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .logo {
+      font-size: 27px;
+      font-weight: 800;
+      letter-spacing: -1px;
+    }
+
+    .logo span, h1 span { color: var(--green); }
+
+    .status {
+      font-size: 10px;
+      color: var(--green);
+      border: 1px solid #326953;
+      border-radius: 30px;
+      padding: 7px 9px;
+    }
+
+    .hero {
+      text-align: center;
+      padding: 35px 0 22px;
+    }
+
+    .symbol {
+      width: 64px;
+      height: 64px;
+      display: grid;
+      place-items: center;
+      margin: 0 auto 17px;
+      border-radius: 20px;
+      background: #173b35;
+      border: 1px solid #28624f;
+      color: var(--green);
+      font-size: 28px;
+    }
+
+    h1 { font-size: 31px; line-height: 1.2; margin: 0; }
+    h2 { font-size: 18px; margin: 0; }
+
+    p {
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.6;
+    }
+
+    .hero p { max-width: 330px; margin: 12px auto 0; }
+
+    .card {
+      background: var(--panel);
+      border: 1px solid #2a3850;
+      border-radius: 20px;
+      padding: 20px;
+      margin-top: 15px;
+    }
+
+    label {
+      display: block;
+      margin: 18px 0 9px;
+      font-size: 13px;
+      font-weight: bold;
+    }
+
+    input[type="url"] {
+      width: 100%;
+      padding: 14px 12px;
+      border: 1px solid #3b4b63;
+      border-radius: 11px;
+      background: var(--bg);
+      color: white;
+      font-size: 14px;
+    }
+
+    button, .file-label {
+      display: block;
+      width: 100%;
+      text-align: center;
+      border: 0;
+      border-radius: 11px;
+      padding: 14px;
+      margin-top: 12px;
+      font-size: 14px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    .primary, .file-label {
+      background: var(--green);
+      color: #092019;
+    }
+
+    .secondary {
+      background: #26344b;
+      color: white;
+      border: 1px solid #3b4b63;
+    }
+
+    #result, #fileResult {
+      display: none;
+      overflow-wrap: anywhere;
+      margin-top: 15px;
+      padding: 13px;
+      border: 1px solid #3b4b63;
+      border-radius: 12px;
+      background: var(--bg);
+    }
+
+    #result p, #fileResult p { margin: 0; }
+
+    #result a {
+      display: inline-block;
+      margin-top: 10px;
+      color: var(--green);
+    }
+
+    #videoFile {
+      display: block;
+      width: 100%;
+      margin-top: 15px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    #preview {
+      display: none;
+      width: 100%;
+      max-height: 300px;
+      margin-top: 15px;
+      border-radius: 12px;
+      background: black;
+    }
+
+    .note {
+      margin-top: 14px;
+      padding: 12px;
+      background: #1d2c40;
+      border-radius: 11px;
+    }
+
+    .note strong {
+      color: var(--green);
+      font-size: 12px;
+    }
+
+    .note p { font-size: 12px; margin: 6px 0 0; }
+
+    footer {
+      text-align: center;
+      margin-top: 25px;
+      color: #7f8da3;
+      font-size: 11px;
+      line-height: 1.7;
+    }
+  </style>
 </head>
+
 <body>
 <main class="app">
   <header class="top">
     <div class="logo">Vido<span>Save</span></div>
-    <div class="status">● PROTOTYPE</div>
+    <div class="status">● EARLY ACCESS</div>
   </header>
 
   <section class="hero">
     <div class="symbol">▶</div>
     <h1>Your videos.<br><span>Your way.</span></h1>
-    <p>Check a link or save a video file you already have.</p>
+    <p>Check video links and manage video files on your device.</p>
+    <button id="installBtn" class="secondary" type="button" hidden>
+      Install VidoSave
+    </button>
   </section>
 
   <section class="card">
     <h2>Check a Facebook link</h2>
-    <p>Check the format of a public Facebook video link.</p>
+    <p>Check whether your link uses a supported Facebook address.</p>
+
     <form id="videoForm">
       <label for="videoUrl">Facebook video URL</label>
-      <input id="videoUrl" type="url" placeholder="https://www.facebook.com/..." required>
+      <input
+        id="videoUrl"
+        type="url"
+        placeholder="https://www.facebook.com/..."
+        autocomplete="url"
+        required
+      >
       <button class="primary" type="submit">Check video link →</button>
     </form>
+
     <div id="result" role="status" aria-live="polite"></div>
   </section>
 
   <section class="card">
-    <h2>Save a video file</h2>
-    <p>Select a video stored on your phone. Preview it, then try to save a copy.</p>
+    <h2>Preview a video file</h2>
+    <p>Select a video already stored on your phone to preview it.</p>
+
     <label for="videoFile">Choose a video from your device</label>
     <input id="videoFile" type="file" accept="video/*">
+
     <video id="preview" controls playsinline></video>
     <div id="fileResult" role="status" aria-live="polite"></div>
-    <button id="saveBtn" class="primary" type="button" hidden>Save video copy ↓</button>
+
     <div class="note">
       <strong>YOUR PRIVACY</strong>
-      <p>The selected file is processed in your browser and is not uploaded by this prototype.</p>
+      <p>
+        This prototype previews the file in your browser.
+        It does not upload your video or download videos from Facebook.
+      </p>
     </div>
   </section>
 
-  <footer>VidoSave · Early prototype<br>Independent project · Not affiliated with Meta</footer>
+  <footer>
+    VidoSave · Early prototype<br>
+    Independent project · Not affiliated with Meta
+  </footer>
 </main>
 
 <script>
-const form = document.getElementById("videoForm");
-const urlInput = document.getElementById("videoUrl");
-const result = document.getElementById("result");
-const fileInput = document.getElementById("videoFile");
-const preview = document.getElementById("preview");
-const fileResult = document.getElementById("fileResult");
-const saveBtn = document.getElementById("saveBtn");
+  const form = document.getElementById("videoForm");
+  const urlInput = document.getElementById("videoUrl");
+  const result = document.getElementById("result");
+  const fileInput = document.getElementById("videoFile");
+  const preview = document.getElementById("preview");
+  const fileResult = document.getElementById("fileResult");
+  const installBtn = document.getElementById("installBtn");
 
-let selectedFile = null;
-let videoObjectUrl = null;
+  let videoObjectUrl = null;
+  let installPrompt = null;
 
-function showMessage(element, message) {
-  element.replaceChildren();
-  element.style.display = "block";
-  const p = document.createElement("p");
-  p.textContent = message;
-  element.appendChild(p);
-}
-
-form.addEventListener("submit", function(event) {
-  event.preventDefault();
-  let url;
-  try {
-    url = new URL(urlInput.value.trim());
-  } catch {
-    showMessage(result, "Please enter a valid web address.");
-    return;
+  function showMessage(element, message) {
+    element.replaceChildren();
+    const p = document.createElement("p");
+    p.textContent = message;
+    element.appendChild(p);
+    element.style.display = "block";
   }
 
-  const host = url.hostname.toLowerCase();
-  const allowed = [
-    "facebook.com", "www.facebook.com",
-    "m.facebook.com", "web.facebook.com", "fb.watch"
-  ];
+  form.addEventListener("submit", function(event) {
+    event.preventDefault();
 
-  if (url.protocol !== "https:" || !allowed.includes(host)) {
-    showMessage(result, "Please enter an HTTPS link from a supported Facebook domain.");
-    return;
-  }
+    let url;
 
-  showMessage(
-  result,
-  "Your link format looks valid, but VidoSave has not downloaded the video. Open the original video on Facebook to view it."
-);
-  const a = document.createElement("a");
-  a.href = url.href;
-  a.target = "_blank";
-  a.rel = "noopener noreferrer";
-  a.textContent = "Open original Facebook video ↗";
-  result.appendChild(a);
-});
-
-fileInput.addEventListener("change", function() {
-  selectedFile = fileInput.files && fileInput.files[0];
-
-  if (videoObjectUrl) URL.revokeObjectURL(videoObjectUrl);
-  videoObjectUrl = null;
-  saveBtn.hidden = true;
-  preview.style.display = "none";
-  preview.removeAttribute("src");
-  preview.load();
-
-  if (!selectedFile) {
-    showMessage(fileResult, "No video selected.");
-    return;
-  }
-
-  if (!selectedFile.type.startsWith("video/")) {
-    selectedFile = null;
-    showMessage(fileResult, "Please select a video file.");
-    return;
-  }
-
-  videoObjectUrl = URL.createObjectURL(selectedFile);
-  preview.src = videoObjectUrl;
-  preview.style.display = "block";
-
-  showMessage(fileResult,
-    "Selected: " + selectedFile.name + " (" +
-    (selectedFile.size / (1024 * 1024)).toFixed(2) + " MB)."
-  );
-  saveBtn.hidden = false;
-});
-
-saveBtn.addEventListener("click", async function() {
-  if (!selectedFile) {
-    showMessage(fileResult, "Choose a video first.");
-    return;
-  }
-
-  // Use a native Save As dialog when the browser supports it.
-  if (window.isSecureContext && "showSaveFilePicker" in window) {
     try {
-      const handle = await window.showSaveFilePicker({
-        suggestedName: selectedFile.name,
-        types: [{
-          description: "Video file",
-          accept: { [selectedFile.type || "application/octet-stream"]: [".mp4", ".webm", ".mov", ".m4v"] }
-        }]
-      });
-
-      const writable = await handle.createWritable();
-      await writable.write(selectedFile);
-      await writable.close();
-      showMessage(fileResult, "Video copy saved successfully.");
+      url = new URL(urlInput.value.trim());
+    } catch {
+      showMessage(result, "Please enter a valid web address.");
       return;
-    } catch (error) {
-      if (error.name === "AbortError") {
-        showMessage(fileResult, "Save cancelled. Your original video is unchanged.");
-        return;
-      }
-      // Continue to the browser download fallback.
     }
+
+    const host = url.hostname.toLowerCase();
+    const supportedHosts = [
+      "facebook.com",
+      "www.facebook.com",
+      "m.facebook.com",
+      "web.facebook.com",
+      "fb.watch"
+    ];
+
+    if (url.protocol !== "https:" ||
+        !supportedHosts.includes(host)) {
+      showMessage(
+        result,
+        "Please enter an HTTPS link from a supported Facebook domain."
+      );
+      return;
+    }
+
+    showMessage(
+      result,
+      "Your link format looks valid, but VidoSave has not retrieved or downloaded the video. Open Facebook to view it."
+    );
+
+    const link = document.createElement("a");
+    link.href = url.href;
+    link.target = "_blank";
+    link.rel = "noopener noreferrer";
+    link.textContent = "Open original Facebook video ↗";
+    result.appendChild(link);
+  });
+
+  fileInput.addEventListener("change", function() {
+    const file = fileInput.files && fileInput.files[0];
+
+    if (videoObjectUrl) {
+      URL.revokeObjectURL(videoObjectUrl);
+      videoObjectUrl = null;
+    }
+
+    preview.pause();
+    preview.removeAttribute("src");
+    preview.load();
+    preview.style.display = "none";
+
+    if (!file) {
+      showMessage(fileResult, "No video selected.");
+      return;
+    }
+
+    if (!file.type.startsWith("video/")) {
+      showMessage(fileResult, "Please select a valid video file.");
+      fileInput.value = "";
+      return;
+    }
+
+    videoObjectUrl = URL.createObjectURL(file);
+    preview.src = videoObjectUrl;
+    preview.style.display = "block";
+
+    showMessage(
+      fileResult,
+      "Selected: " + file.name + " (" +
+      (file.size / (1024 * 1024)).toFixed(2) + " MB). Preview ready."
+    );
+  });
+
+  window.addEventListener("beforeinstallprompt", function(event) {
+    event.preventDefault();
+    installPrompt = event;
+    installBtn.hidden = false;
+  });
+
+  installBtn.addEventListener("click", async function() {
+    if (!installPrompt) {
+      showMessage(
+        result,
+        "If installation is supported, open Chrome's menu and look for Install app or Add to Home screen."
+      );
+      return;
+    }
+
+    installPrompt.prompt();
+    await installPrompt.userChoice;
+    installPrompt = null;
+    installBtn.hidden = true;
+  });
+
+  if ("serviceWorker" in navigator && location.protocol === "https:") {
+    window.addEventListener("load", function() {
+      navigator.serviceWorker.register("./sw.js").catch(function() {
+        console.log("Offline support is not configured yet.");
+      });
+    });
   }
-
-  // Fallback: ask the browser to download the selected file.
-  const downloadUrl = URL.createObjectURL(selectedFile);
-  const a = document.createElement("a");
-  a.href = downloadUrl;
-  a.download = selectedFile.name;
-  a.style.display = "none";
-  document.body.appendChild(a);
-  a.click();
-  a.remove();
-
-  showMessage(fileResult,
-    "The browser was asked to download the file. Check Chrome Downloads. If it fails, your browser may not support saving a file selected from the same device."
-  );
-
-  setTimeout(() => URL.revokeObjectURL(downloadUrl), 60000);
-});
 </script>
 </body>
 </html>

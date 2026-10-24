@@ -22,7 +22,7 @@ body {
   font-family: Arial, sans-serif;
 }
 .app { max-width: 480px; margin: auto; padding: 26px 18px 36px; }
-.top { display: flex; justify-content: space-between; align-items: center; }
+.top { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
 .logo { font-size: 27px; font-weight: 800; letter-spacing: -1px; }
 .logo span, h1 span { color: var(--green); }
 .status { font-size: 11px; color: var(--green); border: 1px solid #326953; border-radius: 30px; padding: 7px 10px; }
@@ -35,14 +35,13 @@ p { color: var(--muted); font-size: 14px; line-height: 1.6; }
 h2 { font-size: 18px; margin: 0; }
 label { display: block; margin: 18px 0 9px; font-size: 13px; font-weight: bold; }
 input[type="url"] { width: 100%; padding: 14px 12px; border: 1px solid #3b4b63; border-radius: 11px; background: var(--bg); color: white; font-size: 14px; }
-input:focus { outline: 2px solid var(--green); outline-offset: 1px; }
 button, .file-label { display: block; width: 100%; text-align: center; border: 0; border-radius: 11px; padding: 14px; margin-top: 12px; font-size: 14px; font-weight: bold; cursor: pointer; }
 .primary, .file-label { background: var(--green); color: #092019; }
 .secondary { background: #26344b; color: white; border: 1px solid #3b4b63; }
 #result, #fileResult { display: none; overflow-wrap: anywhere; margin-top: 15px; padding: 13px; border: 1px solid #3b4b63; border-radius: 12px; background: var(--bg); }
 #result p, #fileResult p { margin: 0; }
-#result a { display: inline-block; margin-top: 10px; color: var(--green); }
-#videoFile { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
+#result a, #fileResult a { display: inline-block; margin-top: 10px; color: var(--green); }
+#videoFile { display: block; width: 100%; margin-top: 15px; color: var(--muted); font-size: 13px; }
 #preview { display: none; width: 100%; max-height: 300px; margin-top: 15px; border-radius: 12px; background: black; }
 .note { margin-top: 14px; padding: 12px; background: #1d2c40; border-radius: 11px; }
 .note strong { color: var(--green); font-size: 12px; }
@@ -76,25 +75,19 @@ footer { text-align: center; margin-top: 25px; color: #7f8da3; font-size: 11px; 
 
   <section class="card">
     <h2>Save a video file</h2>
-    <p>Select a video stored on your phone. You can preview it and save a copy to your device.</p>
-
+    <p>Select a video stored on your phone. Preview it, then try to save a copy.</p>
+    <label for="videoFile">Choose a video from your device</label>
     <input id="videoFile" type="file" accept="video/*">
-    <label for="videoFile" class="file-label">Choose a video from my device</label>
-
     <video id="preview" controls playsinline></video>
     <div id="fileResult" role="status" aria-live="polite"></div>
-    <button id="saveBtn" class="primary" type="button" hidden>Download video copy ↓</button>
-
+    <button id="saveBtn" class="primary" type="button" hidden>Save video copy ↓</button>
     <div class="note">
       <strong>YOUR PRIVACY</strong>
-      <p>The selected video is handled in your browser. This prototype does not upload it to a server.</p>
+      <p>The selected file is processed in your browser and is not uploaded by this prototype.</p>
     </div>
   </section>
 
-  <footer>
-    VidoSave · Early prototype<br>
-    Independent project · Not affiliated with Meta
-  </footer>
+  <footer>VidoSave · Early prototype<br>Independent project · Not affiliated with Meta</footer>
 </main>
 
 <script>
@@ -120,7 +113,6 @@ function showMessage(element, message) {
 form.addEventListener("submit", function(event) {
   event.preventDefault();
   let url;
-
   try {
     url = new URL(urlInput.value.trim());
   } catch {
@@ -130,11 +122,8 @@ form.addEventListener("submit", function(event) {
 
   const host = url.hostname.toLowerCase();
   const allowed = [
-    "facebook.com",
-    "www.facebook.com",
-    "m.facebook.com",
-    "web.facebook.com",
-    "fb.watch"
+    "facebook.com", "www.facebook.com",
+    "m.facebook.com", "web.facebook.com", "fb.watch"
   ];
 
   if (url.protocol !== "https:" || !allowed.includes(host)) {
@@ -142,7 +131,7 @@ form.addEventListener("submit", function(event) {
     return;
   }
 
-  showMessage(result, "The link format looks valid. Actual Facebook video retrieval is not implemented.");
+  showMessage(result, "The link format looks valid. Facebook video retrieval is not implemented.");
   const a = document.createElement("a");
   a.href = url.href;
   a.target = "_blank";
@@ -154,11 +143,8 @@ form.addEventListener("submit", function(event) {
 fileInput.addEventListener("change", function() {
   selectedFile = fileInput.files && fileInput.files[0];
 
-  if (videoObjectUrl) {
-    URL.revokeObjectURL(videoObjectUrl);
-    videoObjectUrl = null;
-  }
-
+  if (videoObjectUrl) URL.revokeObjectURL(videoObjectUrl);
+  videoObjectUrl = null;
   saveBtn.hidden = true;
   preview.style.display = "none";
   preview.removeAttribute("src");
@@ -178,28 +164,60 @@ fileInput.addEventListener("change", function() {
   videoObjectUrl = URL.createObjectURL(selectedFile);
   preview.src = videoObjectUrl;
   preview.style.display = "block";
-  showMessage(
-    fileResult,
-    "Selected: " + selectedFile.name +
-    " (" + (selectedFile.size / (1024 * 1024)).toFixed(2) + " MB)."
+
+  showMessage(fileResult,
+    "Selected: " + selectedFile.name + " (" +
+    (selectedFile.size / (1024 * 1024)).toFixed(2) + " MB)."
   );
   saveBtn.hidden = false;
 });
 
-saveBtn.addEventListener("click", function() {
-  if (!selectedFile || !videoObjectUrl) {
+saveBtn.addEventListener("click", async function() {
+  if (!selectedFile) {
     showMessage(fileResult, "Choose a video first.");
     return;
   }
 
+  // Use a native Save As dialog when the browser supports it.
+  if (window.isSecureContext && "showSaveFilePicker" in window) {
+    try {
+      const handle = await window.showSaveFilePicker({
+        suggestedName: selectedFile.name,
+        types: [{
+          description: "Video file",
+          accept: { [selectedFile.type || "application/octet-stream"]: [".mp4", ".webm", ".mov", ".m4v"] }
+        }]
+      });
+
+      const writable = await handle.createWritable();
+      await writable.write(selectedFile);
+      await writable.close();
+      showMessage(fileResult, "Video copy saved successfully.");
+      return;
+    } catch (error) {
+      if (error.name === "AbortError") {
+        showMessage(fileResult, "Save cancelled. Your original video is unchanged.");
+        return;
+      }
+      // Continue to the browser download fallback.
+    }
+  }
+
+  // Fallback: ask the browser to download the selected file.
+  const downloadUrl = URL.createObjectURL(selectedFile);
   const a = document.createElement("a");
-  a.href = videoObjectUrl;
+  a.href = downloadUrl;
   a.download = selectedFile.name;
+  a.style.display = "none";
   document.body.appendChild(a);
   a.click();
   a.remove();
 
-  showMessage(fileResult, "Download requested. Check your browser's downloads or your device's Downloads folder.");
+  showMessage(fileResult,
+    "The browser was asked to download the file. Check Chrome Downloads. If it fails, your browser may not support saving a file selected from the same device."
+  );
+
+  setTimeout(() => URL.revokeObjectURL(downloadUrl), 60000);
 });
 </script>
 </body>

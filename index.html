@@ -5,7 +5,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#0b1020">
-  <meta name="description" content="VidoSave helps you check video links and manage video files on your device.">
+  <meta name="description" content="VidoSave helps you handle direct video links and preview video files.">
   <link rel="manifest" href="./manifest.json">
   <title>VidoSave | Your Videos, Your Way</title>
 
@@ -123,6 +123,8 @@
       cursor: pointer;
     }
 
+    button:disabled { opacity: 0.6; cursor: wait; }
+
     .primary, .file-label {
       background: var(--green);
       color: #092019;
@@ -134,7 +136,7 @@
       border: 1px solid #3b4b63;
     }
 
-    #result, #fileResult {
+    #result, #fileResult, #directResult {
       display: none;
       overflow-wrap: anywhere;
       margin-top: 15px;
@@ -144,9 +146,9 @@
       background: var(--bg);
     }
 
-    #result p, #fileResult p { margin: 0; }
+    #result p, #fileResult p, #directResult p { margin: 0; }
 
-    #result a {
+    #result a, #directResult a {
       display: inline-block;
       margin-top: 10px;
       color: var(--green);
@@ -203,10 +205,43 @@
   <section class="hero">
     <div class="symbol">▶</div>
     <h1>Your videos.<br><span>Your way.</span></h1>
-    <p>Check video links and manage video files on your device.</p>
+    <p>Handle direct video links and preview video files on your device.</p>
     <button id="installBtn" class="secondary" type="button" hidden>
       Install VidoSave
     </button>
+  </section>
+
+  <section class="card">
+    <h2>Download a direct video link</h2>
+    <p>
+      Paste a direct HTTPS link to a video file, such as an MP4.
+      Only use files you have permission to download.
+    </p>
+
+    <form id="directForm">
+      <label for="directUrl">Direct video-file URL</label>
+      <input
+        id="directUrl"
+        type="url"
+        placeholder="https://example.com/video.mp4"
+        autocomplete="url"
+        required
+      >
+      <button id="downloadBtn" class="primary" type="submit">
+        Try download →
+      </button>
+    </form>
+
+    <div id="directResult" role="status" aria-live="polite"></div>
+
+    <div class="note">
+      <strong>HOW IT WORKS</strong>
+      <p>
+        VidoSave will try to download a video when the source allows it.
+        If the source blocks browser access, the link will open directly
+        instead. This does not guarantee a download.
+      </p>
+    </div>
   </section>
 
   <section class="card">
@@ -241,8 +276,8 @@
     <div class="note">
       <strong>YOUR PRIVACY</strong>
       <p>
-        This prototype previews the file in your browser.
-        It does not upload your video or download videos from Facebook.
+        Local previews stay in your browser. VidoSave does not upload
+        your selected video to a server.
       </p>
     </div>
   </section>
@@ -257,6 +292,12 @@
   const form = document.getElementById("videoForm");
   const urlInput = document.getElementById("videoUrl");
   const result = document.getElementById("result");
+
+  const directForm = document.getElementById("directForm");
+  const directUrl = document.getElementById("directUrl");
+  const directResult = document.getElementById("directResult");
+  const downloadBtn = document.getElementById("downloadBtn");
+
   const fileInput = document.getElementById("videoFile");
   const preview = document.getElementById("preview");
   const fileResult = document.getElementById("fileResult");
@@ -272,6 +313,148 @@
     element.appendChild(p);
     element.style.display = "block";
   }
+
+  function isHttpsUrl(value) {
+    try {
+      const url = new URL(value);
+      return url.protocol === "https:" &&
+        url.hostname &&
+        !url.username &&
+        !url.password;
+    } catch {
+      return false;
+    }
+  }
+
+  directForm.addEventListener("submit", async function(event) {
+    event.preventDefault();
+
+    const value = directUrl.value.trim();
+
+    if (!isHttpsUrl(value)) {
+      showMessage(
+        directResult,
+        "Please enter a valid HTTPS video-file link."
+      );
+      return;
+    }
+
+    const url = new URL(value);
+    const host = url.hostname.toLowerCase();
+    const facebookHosts = [
+      "facebook.com",
+      "www.facebook.com",
+      "m.facebook.com",
+      "web.facebook.com",
+      "fb.watch"
+    ];
+
+    if (facebookHosts.includes(host)) {
+      showMessage(
+        directResult,
+        "This is a Facebook webpage link, not a confirmed direct video-file link. Use the Facebook link checker below instead."
+      );
+      return;
+    }
+
+    const path = url.pathname.toLowerCase();
+    const looksLikeVideo = /\.(mp4|m4v|webm|mov|ogv)$/.test(path);
+
+    if (!looksLikeVideo) {
+      showMessage(
+        directResult,
+        "This link does not end with a recognised video-file extension. Some video sources use special links, so check the address before continuing."
+      );
+      return;
+    }
+
+    downloadBtn.disabled = true;
+    downloadBtn.textContent = "Trying download…";
+    showMessage(
+      directResult,
+      "Trying to access the video file. Please wait."
+    );
+
+    // Open a tab immediately so the browser is less likely to block
+    // the fallback when a cross-origin download is not permitted.
+    let fallbackTab = null;
+
+    try {
+      fallbackTab = window.open("about:blank", "_blank");
+    } catch {
+      fallbackTab = null;
+    }
+
+    if (fallbackTab) {
+      try {
+        fallbackTab.opener = null;
+      } catch {}
+    }
+
+    try {
+      const response = await fetch(url.href, {
+        method: "GET",
+        mode: "cors"
+      });
+
+      if (!response.ok) {
+        throw new Error("The source returned an error.");
+      }
+
+      const blob = await response.blob();
+
+      if (!blob.size) {
+        throw new Error("The video file was empty.");
+      }
+
+      const blobUrl = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = blobUrl;
+      link.download = path.split("/").pop() || "vidosave-video.mp4";
+      link.style.display = "none";
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+
+      if (fallbackTab) fallbackTab.close();
+
+      showMessage(
+        directResult,
+        "The browser was asked to download the video. Check your phone's Downloads folder to confirm it arrived."
+      );
+
+      // Keep the object URL available briefly for the browser download.
+      setTimeout(() => URL.revokeObjectURL(blobUrl), 60000);
+
+    } catch (error) {
+      if (fallbackTab && !fallbackTab.closed) {
+        fallbackTab.location.href = url.href;
+      } else {
+        const link = document.createElement("a");
+        link.href = url.href;
+        link.target = "_blank";
+        link.rel = "noopener noreferrer";
+        link.textContent = "Open video source ↗";
+        directResult.appendChild(document.createElement("br"));
+        directResult.appendChild(link);
+      }
+
+      showMessage(
+        directResult,
+        "This source did not allow VidoSave to fetch the file directly. The video link has been opened instead, if your browser allowed it. It may play rather than download."
+      );
+
+      const fallbackLink = document.createElement("a");
+      fallbackLink.href = url.href;
+      fallbackLink.target = "_blank";
+      fallbackLink.rel = "noopener noreferrer";
+      fallbackLink.textContent = "Open video source ↗";
+      directResult.appendChild(fallbackLink);
+    } finally {
+      downloadBtn.disabled = false;
+      downloadBtn.textContent = "Try download →";
+    }
+  });
 
   form.addEventListener("submit", function(event) {
     event.preventDefault();
@@ -347,7 +530,8 @@
     showMessage(
       fileResult,
       "Selected: " + file.name + " (" +
-      (file.size / (1024 * 1024)).toFixed(2) + " MB). Preview ready."
+      (file.size / (1024 * 1024)).toFixed(2) +
+      " MB). Preview ready."
     );
   });
 

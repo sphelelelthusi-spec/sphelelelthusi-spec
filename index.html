@@ -4,145 +4,191 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="theme-color" content="#101827">
-<title>VidoSave - Video Link Tool</title>
+<meta name="theme-color" content="#0b1020">
+<title>VidoSave | Video Link Assistant</title>
 <style>
 * { box-sizing: border-box; }
-
+:root {
+  --bg: #0b1020;
+  --panel: #141d30;
+  --green: #53f0ad;
+  --muted: #a7b4c8;
+}
 body {
   margin: 0;
-  font-family: Arial, sans-serif;
-  background: #101827;
-  color: #f8fafc;
   min-height: 100vh;
-  display: flex;
-  justify-content: center;
+  background: radial-gradient(ellipse at top, #173a3a 0%, var(--bg) 48%);
+  color: #f8fafc;
+  font-family: Arial, sans-serif;
 }
-
 .app {
   width: 100%;
-  max-width: 440px;
-  padding: 28px 20px;
+  max-width: 480px;
+  margin: auto;
+  padding: 28px 20px 36px;
 }
-
+.top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
 .logo {
   font-size: 27px;
   font-weight: 800;
   letter-spacing: -1px;
 }
-
-.logo span { color: #55e6a5; }
-
-.tag {
-  color: #9caec4;
-  font-size: 14px;
-  margin-top: 8px;
+.logo span { color: var(--green); }
+.status {
+  font-size: 11px;
+  color: var(--green);
+  border: 1px solid #326953;
+  border-radius: 30px;
+  padding: 7px 10px;
 }
-
-.card {
-  margin-top: 35px;
-  background: #1c293b;
-  border: 1px solid #304057;
-  border-radius: 20px;
-  padding: 22px;
+.hero {
+  text-align: center;
+  padding: 42px 0 22px;
 }
-
-h1 { font-size: 25px; line-height: 1.3; }
-
+.symbol {
+  width: 68px;
+  height: 68px;
+  display: grid;
+  place-items: center;
+  margin: 0 auto 20px;
+  border-radius: 22px;
+  background: #173b35;
+  border: 1px solid #28624f;
+  color: var(--green);
+  font-size: 30px;
+}
+h1 {
+  font-size: 31px;
+  line-height: 1.2;
+  margin: 0;
+  letter-spacing: -1px;
+}
+h1 span { color: var(--green); }
 p {
-  color: #b6c3d4;
-  line-height: 1.6;
+  color: var(--muted);
   font-size: 14px;
+  line-height: 1.65;
 }
-
+.hero p { max-width: 330px; margin: 14px auto 0; }
+.card {
+  background: rgba(20, 29, 48, .96);
+  border: 1px solid #2a3850;
+  border-radius: 22px;
+  padding: 22px;
+  box-shadow: 0 18px 55px rgba(0,0,0,.18);
+}
+.card h2 { font-size: 18px; margin: 0; }
 label {
   display: block;
   margin: 22px 0 9px;
-  font-size: 14px;
+  font-size: 13px;
   font-weight: bold;
 }
-
 input {
+  display: block;
   width: 100%;
-  padding: 15px;
-  border-radius: 11px;
-  border: 1px solid #52647b;
-  background: #101827;
+  min-width: 0;
+  padding: 15px 13px;
+  border: 1px solid #3b4b63;
+  border-radius: 12px;
+  background: #0b1020;
   color: white;
-  font-size: 15px;
-  outline: none;
+  font-size: 14px;
 }
-
+input:focus {
+  outline: 2px solid var(--green);
+  outline-offset: 1px;
+}
 button {
   width: 100%;
-  margin-top: 13px;
-  padding: 15px;
   border: 0;
-  border-radius: 11px;
-  background: #55e6a5;
-  color: #102018;
-  font-size: 15px;
+  border-radius: 12px;
+  padding: 15px;
+  margin-top: 12px;
+  font-size: 14px;
   font-weight: bold;
   cursor: pointer;
 }
-
+.primary { background: var(--green); color: #092019; }
 .secondary {
-  background: #2d3b50;
-  color: white;
+  background: #26344b;
+  color: #f8fafc;
+  border: 1px solid #3b4b63;
 }
-
 #result {
   display: none;
-  margin-top: 18px;
-  padding: 14px;
-  background: #101827;
-  border-radius: 12px;
   overflow-wrap: anywhere;
+  margin-top: 17px;
+  padding: 14px;
+  border: 1px solid #3b4b63;
+  border-radius: 12px;
+  background: #0b1020;
 }
-
+#result p { margin: 0; }
 #result a {
-  color: #55e6a5;
   display: inline-block;
   margin-top: 12px;
+  color: var(--green);
 }
-
-.note {
-  margin-top: 20px;
+.info {
+  margin-top: 17px;
   padding: 13px;
-  border-radius: 10px;
-  background: #263346;
-  font-size: 12px;
-  line-height: 1.6;
-  color: #c7d3e2;
+  background: #1d2c40;
+  border-radius: 12px;
 }
-
+.info strong { color: var(--green); font-size: 12px; }
+.info p { font-size: 12px; margin: 6px 0 0; }
+.features {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-top: 18px;
+}
+.feature {
+  padding: 14px;
+  border-radius: 14px;
+  background: #141d30;
+  border: 1px solid #26344b;
+}
+.feature strong { font-size: 13px; }
+.feature p { font-size: 11px; margin-bottom: 0; }
 footer {
-  margin-top: 25px;
   text-align: center;
-  font-size: 12px;
-  color: #91a0b5;
+  margin-top: 28px;
+  color: #7f8da3;
+  font-size: 11px;
+  line-height: 1.7;
 }
 </style>
 </head>
 <body>
 <main class="app">
-  <div class="logo">Vido<span>Save</span></div>
-  <div class="tag">Your video link assistant</div>
+  <header class="top">
+    <div class="logo">Vido<span>Save</span></div>
+    <div class="status">● PROTOTYPE</div>
+  </header>
+
+  <section class="hero">
+    <div class="symbol">▶</div>
+    <h1>Your videos.<br><span>Your way.</span></h1>
+    <p>A simple place to check video links and open the original video.</p>
+  </section>
 
   <section class="card">
-    <h1>Save the videos you love.</h1>
-    <p>Start by pasting a public Facebook video link below.</p>
+    <h2>Check a video link</h2>
+    <p>Paste an HTTPS Facebook video link below to check its format.</p>
 
     <form id="videoForm">
-      <label for="videoUrl">Facebook video URL</label>
-      <input
-        id="videoUrl"
-        type="url"
+      <label for="videoUrl">Video URL</label>
+      <input id="videoUrl" type="url"
         placeholder="https://www.facebook.com/..."
-        required
-      >
+        autocomplete="url" required>
 
-      <button type="submit">Check video link</button>
+      <button class="primary" type="submit">Check video link →</button>
       <button class="secondary" type="button" id="pasteBtn">
         Paste from clipboard
       </button>
@@ -150,15 +196,26 @@ footer {
 
     <div id="result" role="status" aria-live="polite"></div>
 
-    <div class="note">
-      Prototype version 0.1. This tool checks the link format
-      only. It does not fetch or download videos. Only use
-      content you own or have permission to save.
+    <div class="info">
+      <strong>IMPORTANT INFORMATION</strong>
+      <p>This prototype checks the link format only. Video retrieval and downloading are not yet available. Only save videos you own or have permission to download.</p>
+    </div>
+  </section>
+
+  <section class="features">
+    <div class="feature">
+      <strong>↗ Link checking</strong>
+      <p>Check whether a link uses a supported Facebook domain.</p>
+    </div>
+    <div class="feature">
+      <strong>✓ Permission first</strong>
+      <p>Respect creators and their content.</p>
     </div>
   </section>
 
   <footer>
-    Independent prototype · Not affiliated with Meta
+    VidoSave · Early prototype<br>
+    Independent project · Not affiliated with Meta
   </footer>
 </main>
 
@@ -171,17 +228,17 @@ function showResult(message, link) {
   result.replaceChildren();
   result.style.display = "block";
 
-  const text = document.createElement("p");
-  text.textContent = message;
-  result.appendChild(text);
+  const p = document.createElement("p");
+  p.textContent = message;
+  result.appendChild(p);
 
   if (link) {
-    const anchor = document.createElement("a");
-    anchor.href = link;
-    anchor.target = "_blank";
-    anchor.rel = "noopener noreferrer";
-    anchor.textContent = "Open Facebook video";
-    result.appendChild(anchor);
+    const a = document.createElement("a");
+    a.href = link;
+    a.target = "_blank";
+    a.rel = "noopener noreferrer";
+    a.textContent = "Open original Facebook video ↗";
+    result.appendChild(a);
   }
 }
 
@@ -189,7 +246,6 @@ form.addEventListener("submit", function(event) {
   event.preventDefault();
 
   let url;
-
   try {
     url = new URL(input.value.trim());
   } catch {
@@ -206,8 +262,7 @@ form.addEventListener("submit", function(event) {
     "fb.watch"
   ];
 
-  if (url.protocol !== "https:" ||
-      !allowed.includes(host)) {
+  if (url.protocol !== "https:" || !allowed.includes(host)) {
     showResult("Please enter an HTTPS link from a supported Facebook domain.");
     return;
   }

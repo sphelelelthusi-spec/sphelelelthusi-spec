@@ -198,24 +198,60 @@ downloadBtn.textContent="Try download →";
 }
 });
 
-form.addEventListener("submit",function(event){
-event.preventDefault();
-let url;
-try{url=new URL(urlInput.value.trim());}
-catch{showMessage(result,"Please enter a valid web address.");return;}
-const host=url.hostname.toLowerCase();
-const isFacebook=host==="facebook.com"||host.endsWith(".facebook.com")||host==="fb.watch"||host.endsWith(".fb.watch");
-if(url.protocol!=="https:"||!isFacebook){
-showMessage(result,"Please enter an HTTPS link from a supported Facebook domain.");
-return;
-}
-showMessage(result,"Your link format looks valid, but VidoSave has not retrieved or downloaded the video. Open Facebook to view it.");
-const link=document.createElement("a");
-link.href=url.href;
-link.target="_blank";
-link.rel="noopener noreferrer";
-link.textContent="Open original Facebook video ↗";
-result.appendChild(link);
+form.addEventListener("submit", async function(event) {
+  event.preventDefault();
+
+  let url;
+
+  try {
+    url = new URL(urlInput.value.trim());
+  } catch {
+    showMessage(result, "Please enter a valid web address.");
+    return;
+  }
+
+  const host = url.hostname.toLowerCase();
+  const isFacebook =
+    host === "facebook.com" ||
+    host.endsWith(".facebook.com") ||
+    host === "fb.watch";
+
+  if (url.protocol !== "https:" || !isFacebook) {
+    showMessage(result, "Please enter a valid HTTPS Facebook video link.");
+    return;
+  }
+
+  showMessage(result, "Checking your link with VidoSave...");
+
+  try {
+    const response = await fetch(
+      "https://vidosave-api.sphelelelthusi.workers.dev/api/check",
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ videoUrl: url.href })
+      }
+    );
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      showMessage(result, data.error || "Unable to check this link.");
+      return;
+    }
+
+    showMessage(result, data.message);
+
+    const link = document.createElement("a");
+    link.href = url.href;
+    link.target = "_blank";
+    link.rel = "noopener noreferrer";
+    link.textContent = "Open original Facebook video ↗";
+    result.appendChild(link);
+
+  } catch {
+    showMessage(result, "Could not reach VidoSave. Please try again.");
+  }
 });
 
 fileInput.addEventListener("change",function(){
